@@ -1,0 +1,95 @@
+version: '3.9'
+services:
+
+  activiti-rest:
+    build:
+      context: .
+      dockerfile: Dockerfile-rest
+    hostname: activiti-rest
+    container_name: activiti-rest
+    networks:
+     - activiti-network    
+    environment:
+     JAVA_OPTS: " -Xms256m -Xmx1g"
+    ports:
+    - 8081:8080
+    depends_on:
+      - activiti_postgres
+    restart: on-failure
+
+  activiti-admin:
+    build:
+      context: .
+      dockerfile: Dockerfile-admin
+    hostname: activiti-admin
+    container_name: activiti-admin
+    networks:
+     - activiti-network    
+    environment:
+     JAVA_OPTS: " -Xms256m -Xmx1g"
+    ports:
+    - 9090:8080
+    depends_on:
+      - activiti-admin_postgres
+
+  activiti-app:
+    build:
+      context: .
+      dockerfile: Dockerfile-app
+    hostname: activiti-app
+    container_name: activiti-app
+    networks:
+     - activiti-network    
+    environment:
+     JAVA_OPTS: " -Xms256m -Xmx1g"
+    ports:
+    - 8080:8080
+    depends_on:
+      - activiti_postgres
+    volumes:
+      - activiti-contentstore-volume:/data
+      
+  activiti_postgres:
+    hostname: activiti_postgres
+    container_name: activiti_postgres
+    networks:
+     - activiti-network
+    image: postgres:13.1
+    environment:
+      POSTGRES_DB: activiti
+      POSTGRES_USER: activiti
+      POSTGRES_PASSWORD: activiti
+    ports:
+      - 5432:5432
+    volumes:
+      - activiti-db-volume:/var/lib/postgresql/data
+  
+  activiti-admin_postgres:
+    hostname: activiti-admin_postgres
+    container_name: activiti-admin_postgres
+    networks:
+     - activiti-network
+    image: postgres:13.1
+    environment:
+      POSTGRES_DB: activiti-admin
+      POSTGRES_USER: activiti
+      POSTGRES_PASSWORD: activiti
+    ports:
+      - 5433:5433
+    expose:
+     - "5433"
+    command: -p 5433
+    volumes:
+      - activiti-admin-db-volume:/var/lib/postgresql/data
+
+networks:
+    activiti-network:
+     name: activiti-network
+
+volumes:
+    activiti-admin-db-volume:
+      external: true
+    activiti-db-volume:
+      external: true
+    activiti-contentstore-volume:
+      external: true

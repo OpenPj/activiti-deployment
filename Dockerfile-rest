@@ -1,0 +1,30 @@
+FROM tomcat:8-jdk11-openjdk
+
+ARG TOMCAT_DIR=/usr/local/tomcat
+ARG USERNAME=activiti
+ARG USERID=33007
+
+USER root
+
+RUN useradd -c "Activiti" -M -s "/bin/bash" -u "${USERID}" -o "${USERNAME}"
+
+RUN rm -rf $TOMCAT_DIR/webapps/activiti-rest
+
+COPY --chown=${USERNAME} jdbc-driver/*.jar $TOMCAT_DIR/lib/
+COPY --chown=${USERNAME} wars/activiti-rest.war $TOMCAT_DIR/webapps
+
+RUN unzip $TOMCAT_DIR/webapps/activiti-rest.war -d $TOMCAT_DIR/webapps/activiti-rest
+RUN rm $TOMCAT_DIR/webapps/activiti-rest.war
+
+COPY --chown=${USERNAME} config/rest/activiti-rest.properties $TOMCAT_DIR/webapps/activiti-rest/WEB-INF/classes/db.properties
+COPY --chown=${USERNAME} config/rest/engine.properties $TOMCAT_DIR/webapps/activiti-rest/WEB-INF/classes/engine.properties
+
+COPY --chown=${USERNAME} logging/activiti-rest-log4j.properties $TOMCAT_DIR/webapps/activiti-rest/WEB-INF/classes
+
+COPY --chown=${USERNAME} config/setenv.sh ${TOMCAT_DIR}/bin
+
+RUN wget https://repo1.maven.org/maven2/javax/xml/bind/jaxb-api/2.2.11/jaxb-api-2.2.11.jar -P ${TOMCAT_DIR}/lib
+
+RUN chown ${USERNAME}:${USERNAME} -R /usr/local/tomcat
+
+USER ${USERNAME}
