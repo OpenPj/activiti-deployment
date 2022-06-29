@@ -3,7 +3,7 @@
 Docker Compose project for deploying the Activiti Platform.
 The goal of this project is to help system administrators to manage an Activiti infrastructure deployed with Docker where they also need to configure parameters or install extensions. 
 
-Developers can consider to use the [Activiti SDK](https://github.com/OpenPj/activiti-sdk) to create custom containers.
+Developers can consider to use our [Activiti SDK](https://github.com/OpenPj/activiti-sdk) to create custom containers.
 
 The architecture template will help you deploying Activiti for you with the following tested components:
 
